@@ -11,7 +11,6 @@ config_version=5
 [application]
 
 config/name="FPS Multiplayer Template"
-config/tags=PackedStringArray("fps", "gamepad", "menu", "multiplayer")
 run/main_scene="res://world.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"

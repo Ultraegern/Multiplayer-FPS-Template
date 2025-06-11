@@ -5,9 +5,10 @@ extends Node
 @onready var pause_menu: PanelContainer = $Menu/PauseMenu
 @onready var address_entry: LineEdit = %AddressEntry
 @onready var menu_music: AudioStreamPlayer = %MenuMusic
+@onready var port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PortBox
+@onready var option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/OptionButton
 
 const Player = preload("res://player.tscn")
-const PORT = 9999
 var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var paused: bool = false
 var options: bool = false
@@ -15,7 +16,7 @@ var controller: bool = false
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("pause") and !main_menu.visible and !options_menu.visible:
-		paused = !paused
+		paused = not paused
 	if event is InputEventJoypadMotion:
 		controller = true
 	elif event is InputEventMouseMotion:
@@ -58,25 +59,25 @@ func _on_host_button_pressed() -> void:
 	$Menu/DollyCamera.hide()
 	$Menu/Blur.hide()
 	menu_music.stop()
-
-	enet_peer.create_server(PORT)
+	
+	enet_peer.create_server(int(port_box.value))
 	multiplayer.multiplayer_peer = enet_peer
 	multiplayer.peer_connected.connect(add_player)
 	multiplayer.peer_disconnected.connect(remove_player)
-
+	
 	if options_menu.visible:
 		options_menu.hide()
-
+	
 	add_player(multiplayer.get_unique_id())
-
-	upnp_setup()
+	
+	if option_button.selected == 1: upnp_setup()
 
 func _on_join_button_pressed() -> void:
 	main_menu.hide()
 	$Menu/Blur.hide()
 	menu_music.stop()
 	
-	enet_peer.create_client(address_entry.text, PORT)
+	enet_peer.create_client(address_entry.text, int(port_box.value))
 	if options_menu.visible:
 		options_menu.hide()
 	multiplayer.multiplayer_peer = enet_peer
@@ -88,10 +89,7 @@ func _on_options_button_toggled(toggled_on: bool) -> void:
 		options_menu.hide()
 		
 func _on_music_toggle_toggled(toggled_on: bool) -> void:
-	if !toggled_on:
-		menu_music.stop()
-	else:
-		menu_music.play()
+	menu_music.stream_paused = not toggled_on
 
 func add_player(peer_id: int) -> void:
 	var player: Node = Player.instantiate()
@@ -105,12 +103,16 @@ func remove_player(peer_id: int) -> void:
 
 func upnp_setup() -> void:
 	var upnp: UPNP = UPNP.new()
-
-	upnp.discover()
-	upnp.add_port_mapping(PORT)
-
+	
+	upnp.discover() #TODO run asyncronus
+	upnp.add_port_mapping(int(port_box.value))
+	
 	var ip: String = upnp.query_external_address()
 	if ip == "":
 		print("Failed to establish upnp connection!")
 	else:
 		print("Success! Join Address: %s" % upnp.query_external_address())
+
+func _on_advanced_toggle_toggled(toggled_on: bool) -> void:
+	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PortBox.visible = toggled_on
+	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/OptionButton.visible = toggled_on
