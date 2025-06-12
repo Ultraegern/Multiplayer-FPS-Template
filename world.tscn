@@ -133,6 +133,7 @@ transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0.7
 
 [node name="Options" type="PanelContainer" parent="Menu"]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 13
 anchor_left = 0.5
 anchor_right = 0.5
@@ -311,6 +312,7 @@ text = "Host"
 script = ExtResource("4_nuahp")
 
 [node name="OptionButton" type="OptionButton" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
+visible = false
 layout_mode = 2
 tooltip_text = "Port Forwording
 For gaming on WAN you need port forwording; on on LAN you don't.

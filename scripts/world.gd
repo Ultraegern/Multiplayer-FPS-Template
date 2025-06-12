@@ -1,5 +1,7 @@
 extends Node
 
+signal upnp_completed(error)
+
 @onready var main_menu: PanelContainer = $Menu/MainMenu
 @onready var options_menu: PanelContainer = $Menu/Options
 @onready var pause_menu: PanelContainer = $Menu/PauseMenu
@@ -13,9 +15,10 @@ var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var paused: bool = false
 var options: bool = false
 var controller: bool = false
+var upnp_thread = null
 
 func _unhandled_input(event: InputEvent) -> void:
-	if Input.is_action_pressed("pause") and !main_menu.visible and !options_menu.visible:
+	if Input.is_action_pressed("pause") and not main_menu.visible and not options_menu.visible:
 		paused = not paused
 	if event is InputEventJoypadMotion:
 		controller = true
@@ -70,7 +73,7 @@ func _on_host_button_pressed() -> void:
 	
 	add_player(multiplayer.get_unique_id())
 	
-	if option_button.selected == 1: upnp_setup()
+	if option_button.selected == 1: upnp_setup_threaded(int(port_box.value))
 
 func _on_join_button_pressed() -> void:
 	main_menu.hide()
@@ -101,18 +104,35 @@ func remove_player(peer_id: int) -> void:
 	if player:
 		player.queue_free()
 
-func upnp_setup() -> void:
+func upnp_setup_threaded(port: int) -> void:
+	upnp_thread = Thread.new()
+	upnp_thread.start(_upnp_setup.bind(port))
+
+func _upnp_setup(port: int) -> void:
 	var upnp: UPNP = UPNP.new()
 	
-	upnp.discover() #TODO run asyncronus
-	upnp.add_port_mapping(int(port_box.value))
+	var err = upnp.discover()
+	if not err == OK:
+		push_error("UPnP error nr: " + str(err))
+		upnp_completed.emit(err)
+		return
+	
+	if upnp.get_gateway() and upnp.get_gateway().is_valid_gateway():
+		upnp.add_port_mapping(port, port, ProjectSettings.get_setting("application/config/name"), "UDP")
+		upnp.add_port_mapping(port, port, ProjectSettings.get_setting("application/config/name"), "TCP")
+		upnp_completed.emit(OK)
 	
 	var ip: String = upnp.query_external_address()
 	if ip == "":
 		print("Failed to establish upnp connection!")
 	else:
-		print("Success! Join Address: %s" % upnp.query_external_address())
+		print("Success! Join Address: %s" % ip)
+		DisplayServer.clipboard_set(ip)
 
 func _on_advanced_toggle_toggled(toggled_on: bool) -> void:
 	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PortBox.visible = toggled_on
 	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/OptionButton.visible = toggled_on
+
+func _exit_tree() -> void:
+	# Wait for thread finish here to handle game exit while the thread is running.
+	if upnp_thread: upnp_thread.wait_to_finish()
