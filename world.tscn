@@ -302,28 +302,9 @@ text = "Main Menu"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
+[node name="JoinButton" type="Button" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
-
-[node name="HostButton" type="Button" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Host"
-script = ExtResource("4_nuahp")
-
-[node name="OptionButton" type="OptionButton" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
-visible = false
-layout_mode = 2
-tooltip_text = "Port Forwording
-For gaming on WAN you need port forwording; on on LAN you don't.
-No UPnP - Recomend for LAN gaming, but for WAN you must manualy port forword.
-UPnP - Easy automatic port forwording, but must be enabled on your router, and has security concerns."
-selected = 0
-item_count = 2
-popup/item_0/text = "No UPnP"
-popup/item_0/id = 1
-popup/item_1/text = "UPnP"
-popup/item_1/id = 0
+text = "  Join  "
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -335,7 +316,7 @@ size_flags_horizontal = 3
 placeholder_text = "Enter IP Address Here"
 alignment = 1
 
-[node name="PortBox" type="SpinBox" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="JoinPortBox" type="SpinBox" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer"]
 visible = false
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
@@ -345,9 +326,73 @@ value = 9999.0
 rounded = true
 prefix = "Port:"
 
-[node name="JoinButton" type="Button" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="WebsocketJoinOptionButton" type="OptionButton" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
-text = "  Join  "
+tooltip_text = "Networking Backend
+Must be the same as server"
+selected = 0
+item_count = 2
+popup/item_0/text = "ENet"
+popup/item_0/id = 1
+popup/item_1/text = "WebSocket"
+popup/item_1/id = 0
+
+[node name="HSeparator" type="HSeparator" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Host Dedicated Server"
+script = ExtResource("4_nuahp")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="HostPortBox" type="SpinBox" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1024.0
+max_value = 65535.0
+value = 9999.0
+rounded = true
+prefix = "Port:"
+
+[node name="UPnPOptionButton" type="OptionButton" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Port Forwording
+For gaming on WAN you need port forwording; on on LAN you don't.
+No UPnP - Recomend for LAN gaming, but for WAN you must manualy port forword.
+UPnP - Easy automatic port forwording, but must be enabled on your router, and has security concerns."
+selected = 0
+item_count = 2
+popup/item_0/text = "No UPnP"
+popup/item_0/id = 1
+popup/item_1/text = "UPnP"
+popup/item_1/id = 0
+
+[node name="WebsocketHostOptionButton" type="OptionButton" parent="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Networking Backend
+The dedicated server must always be a desktop client.
+ENet - Only works with desktop clients.
+WebSocket - Also works with web clients."
+selected = 0
+item_count = 2
+popup/item_0/text = "ENet"
+popup/item_0/id = 1
+popup/item_1/text = "WebSocket"
+popup/item_1/id = 0
+
+[node name="HSeparator2" type="HSeparator" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
 
 [node name="OptionsButton" type="Button" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -371,6 +416,11 @@ text = "Show Advanced Networking"
 _spawnable_scenes = PackedStringArray("uid://b2qhxdrnviyqf")
 spawn_path = NodePath("..")
 
+[node name="ServerCamPivot" type="Node3D" parent="."]
+
+[node name="ServerCam" type="Camera3D" parent="ServerCamPivot"]
+transform = Transform3D(-4.37114e-08, -0.5, 0.866025, 0, 0.866025, 0.5, -1, 2.18557e-08, -3.78552e-08, 18, 5, 0)
+
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/FpsCounter" to="FpsCounter" method="_on_fps_counter_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/Ping" to="FpsCounter" method="_on_ping_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/MusicToggle" to="." method="_on_music_toggle_toggled"]
@@ -381,8 +431,8 @@ spawn_path = NodePath("..")
 [connection signal="pressed" from="Menu/Options/MarginContainer/VBoxContainer/Back" to="Menu/MainMenu/MarginContainer/VBoxContainer/OptionsButton" method="_on_back_pressed"]
 [connection signal="pressed" from="Menu/PauseMenu/MarginContainer/VBoxContainer/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Menu/PauseMenu/MarginContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
-[connection signal="pressed" from="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/HostButton" to="." method="_on_host_button_pressed"]
-[connection signal="pressed" from="Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="Menu/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="Menu/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="toggled" from="Menu/MainMenu/MarginContainer/VBoxContainer/OptionsButton" to="." method="_on_options_button_toggled"]
 [connection signal="toggled" from="Menu/MainMenu/MarginContainer/VBoxContainer/OptionsButton" to="Menu/Options/MarginContainer/VBoxContainer/Fullscreen" method="_on_options_button_toggled"]
 [connection signal="toggled" from="Menu/MainMenu/AdvancedToggle" to="." method="_on_advanced_toggle_toggled"]

@@ -1,21 +1,30 @@
 extends Node
 
-signal upnp_completed(error)
+signal upnp_completed(error: int)
 
 @onready var main_menu: PanelContainer = $Menu/MainMenu
 @onready var options_menu: PanelContainer = $Menu/Options
 @onready var pause_menu: PanelContainer = $Menu/PauseMenu
-@onready var address_entry: LineEdit = %AddressEntry
 @onready var menu_music: AudioStreamPlayer = %MenuMusic
-@onready var port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PortBox
-@onready var option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/OptionButton
+
+@onready var address_entry: LineEdit = %AddressEntry
+@onready var join_port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/JoinPortBox
+@onready var websocket_join_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/WebsocketJoinOptionButton
+
+@onready var host_port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/HostPortBox
+@onready var upnp_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/UPnPOptionButton
+@onready var websocket_host_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/WebsocketHostOptionButton
+
+@onready var server_cam: Camera3D = $ServerCamPivot/ServerCam
+@onready var server_cam_pivot: Node3D = $ServerCamPivot
 
 const Player = preload("res://player.tscn")
 var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var paused: bool = false
 var options: bool = false
 var controller: bool = false
-var upnp_thread = null
+var upnp_thread: Thread = null
+var is_server: bool = false
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("pause") and not main_menu.visible and not options_menu.visible:
@@ -25,18 +34,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion:
 		controller = false
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if is_server: server_cam_pivot.rotate_y(deg_to_rad(5.625) * delta)
 	if paused:
 		$Menu/Blur.show()
 		pause_menu.show()
-		if !controller:
+		if not controller:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _on_resume_pressed() -> void:
-	if !options:
+	if not options:
 		$Menu/Blur.hide()
 	$Menu/PauseMenu.hide()
-	if !controller:
+	if not controller:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	paused = false
 	
@@ -45,42 +55,44 @@ func _on_options_pressed() -> void:
 	$Menu/Options.show()
 	$Menu/Blur.show()
 	%Fullscreen.grab_focus()
-	if !controller:
+	if not controller:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	options = true
 
 func _on_back_pressed() -> void:
 	if options:
 		$Menu/Blur.hide()
-		if !controller:
+		if not controller:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		options = false
 
 #func _ready() -> void:
 func _on_host_button_pressed() -> void:
+	is_server = true
 	main_menu.hide()
 	$Menu/DollyCamera.hide()
 	$Menu/Blur.hide()
 	menu_music.stop()
+	server_cam.current = true
 	
-	enet_peer.create_server(int(port_box.value))
+	enet_peer.create_server(int(host_port_box.value))
 	multiplayer.multiplayer_peer = enet_peer
 	multiplayer.peer_connected.connect(add_player)
 	multiplayer.peer_disconnected.connect(remove_player)
 	
-	if options_menu.visible:
-		options_menu.hide()
+	#if options_menu.visible:
+	#	options_menu.hide()
+	#
+	#add_player(multiplayer.get_unique_id())
 	
-	add_player(multiplayer.get_unique_id())
-	
-	if option_button.selected == 1: upnp_setup_threaded(int(port_box.value))
+	if upnp_option_button.selected == 1: upnp_setup_threaded(int(host_port_box.value))
 
 func _on_join_button_pressed() -> void:
 	main_menu.hide()
 	$Menu/Blur.hide()
 	menu_music.stop()
-	
-	enet_peer.create_client(address_entry.text, int(port_box.value))
+	var address: String = address_entry.text if address_entry.text else "127.0.0.1"
+	enet_peer.create_client(address, int(join_port_box.value))
 	if options_menu.visible:
 		options_menu.hide()
 	multiplayer.multiplayer_peer = enet_peer
@@ -111,7 +123,7 @@ func upnp_setup_threaded(port: int) -> void:
 func _upnp_setup(port: int) -> void:
 	var upnp: UPNP = UPNP.new()
 	
-	var err = upnp.discover()
+	var err: int = upnp.discover()
 	if not err == OK:
 		push_error("UPnP error nr: " + str(err))
 		upnp_completed.emit(err)
@@ -130,8 +142,11 @@ func _upnp_setup(port: int) -> void:
 		DisplayServer.clipboard_set(ip)
 
 func _on_advanced_toggle_toggled(toggled_on: bool) -> void:
-	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PortBox.visible = toggled_on
-	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/OptionButton.visible = toggled_on
+	join_port_box.visible = toggled_on
+	websocket_join_option_button.visible = toggled_on
+	$Menu/MainMenu/MarginContainer/VBoxContainer/HSeparator.visible = toggled_on
+	$Menu/MainMenu/MarginContainer/VBoxContainer/HostButton.visible = toggled_on
+	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2.visible = toggled_on
 
 func _exit_tree() -> void:
 	# Wait for thread finish here to handle game exit while the thread is running.
