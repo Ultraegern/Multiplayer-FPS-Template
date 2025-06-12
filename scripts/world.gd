@@ -9,15 +9,16 @@ signal upnp_completed(error: int)
 
 @onready var address_entry: LineEdit = %AddressEntry
 @onready var join_port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/JoinPortBox
-@onready var websocket_join_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/WebsocketJoinOptionButton
+@onready var network_backend_join_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NetworkBackendJoinOptionButton
 
 @onready var host_port_box: SpinBox = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/HostPortBox
 @onready var upnp_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/UPnPOptionButton
-@onready var websocket_host_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/WebsocketHostOptionButton
+@onready var network_backend_host_option_button: OptionButton = $Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/NetworkBackendHostOptionButton
 
 @onready var server_cam: Camera3D = $ServerCamPivot/ServerCam
 @onready var server_cam_pivot: Node3D = $ServerCamPivot
 
+enum {ENet, WebSocket}
 const Player = preload("res://player.tscn")
 var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var paused: bool = false
@@ -75,10 +76,13 @@ func _on_host_button_pressed() -> void:
 	menu_music.stop()
 	server_cam.current = true
 	
-	enet_peer.create_server(int(host_port_box.value))
-	multiplayer.multiplayer_peer = enet_peer
-	multiplayer.peer_connected.connect(add_player)
-	multiplayer.peer_disconnected.connect(remove_player)
+	if network_backend_host_option_button.selected == ENet:
+		enet_peer.create_server(int(host_port_box.value))
+		multiplayer.multiplayer_peer = enet_peer
+		multiplayer.peer_connected.connect(add_player)
+		multiplayer.peer_disconnected.connect(remove_player)
+	elif network_backend_host_option_button.selected == WebSocket:
+		pass #TODO
 	
 	#if options_menu.visible:
 	#	options_menu.hide()
@@ -91,11 +95,16 @@ func _on_join_button_pressed() -> void:
 	main_menu.hide()
 	$Menu/Blur.hide()
 	menu_music.stop()
+	
 	var address: String = address_entry.text if address_entry.text else "127.0.0.1"
-	enet_peer.create_client(address, int(join_port_box.value))
-	if options_menu.visible:
-		options_menu.hide()
-	multiplayer.multiplayer_peer = enet_peer
+	
+	if network_backend_join_option_button.selected == ENet:
+		enet_peer.create_client(address, int(join_port_box.value))
+		if options_menu.visible:
+			options_menu.hide()
+		multiplayer.multiplayer_peer = enet_peer
+	elif network_backend_join_option_button.selected == WebSocket:
+		pass #TODO
 
 func _on_options_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
@@ -143,7 +152,7 @@ func _upnp_setup(port: int) -> void:
 
 func _on_advanced_toggle_toggled(toggled_on: bool) -> void:
 	join_port_box.visible = toggled_on
-	websocket_join_option_button.visible = toggled_on
+	network_backend_join_option_button.visible = toggled_on
 	$Menu/MainMenu/MarginContainer/VBoxContainer/HSeparator.visible = toggled_on
 	$Menu/MainMenu/MarginContainer/VBoxContainer/HostButton.visible = toggled_on
 	$Menu/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2.visible = toggled_on
