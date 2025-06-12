@@ -20,7 +20,8 @@ signal upnp_completed(error: int)
 
 enum {ENet, WebSocket}
 const Player = preload("res://player.tscn")
-var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
+#var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
+var websocket_peer: WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
 var paused: bool = false
 var options: bool = false
 var controller: bool = false
@@ -77,12 +78,17 @@ func _on_host_button_pressed() -> void:
 	server_cam.current = true
 	
 	if network_backend_host_option_button.selected == ENet:
-		enet_peer.create_server(int(host_port_box.value))
-		multiplayer.multiplayer_peer = enet_peer
+		#enet_peer.create_server(int(host_port_box.value))
+		#multiplayer.multiplayer_peer = enet_peer
+		#multiplayer.peer_connected.connect(add_player)
+		#multiplayer.peer_disconnected.connect(remove_player)
+		pass
+	elif network_backend_host_option_button.selected == WebSocket:
+		multiplayer.multiplayer_peer = null
+		websocket_peer.create_server(int(host_port_box.value))
+		multiplayer.multiplayer_peer = websocket_peer
 		multiplayer.peer_connected.connect(add_player)
 		multiplayer.peer_disconnected.connect(remove_player)
-	elif network_backend_host_option_button.selected == WebSocket:
-		pass #TODO
 	
 	#if options_menu.visible:
 	#	options_menu.hide()
@@ -99,12 +105,17 @@ func _on_join_button_pressed() -> void:
 	var address: String = address_entry.text if address_entry.text else "127.0.0.1"
 	
 	if network_backend_join_option_button.selected == ENet:
-		enet_peer.create_client(address, int(join_port_box.value))
+		#enet_peer.create_client(address, int(join_port_box.value))
+		#if options_menu.visible:
+		#	options_menu.hide()
+		#multiplayer.multiplayer_peer = enet_peer
+		pass
+	elif network_backend_join_option_button.selected == WebSocket:
+		multiplayer.multiplayer_peer = null
+		websocket_peer.create_client("ws://" + address + ":" + str(int(join_port_box.value)))
 		if options_menu.visible:
 			options_menu.hide()
-		multiplayer.multiplayer_peer = enet_peer
-	elif network_backend_join_option_button.selected == WebSocket:
-		pass #TODO
+		multiplayer.multiplayer_peer = websocket_peer
 
 func _on_options_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
