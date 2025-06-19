@@ -33,7 +33,6 @@ var is_server: bool = false
 func _ready() -> void:
 	if OS.has_feature("dedicated_server"):
 		print("Starting dedicated server...")
-		print(OS.get_cmdline_args())
 		_on_host_button_pressed(true)
 		
 
@@ -80,7 +79,6 @@ func _on_back_pressed() -> void:
 func _on_host_button_pressed(is_dedicated_server: bool = false) -> void:
 	is_server = true
 	var host_port: int = int(host_port_box.value) if (not is_dedicated_server and (not OS.get_cmdline_args().find("-p") == -1 or not OS.get_cmdline_args().find("--port") == -1)) else int(OS.get_cmdline_args()[(OS.get_cmdline_args().find("-p") + 1) if (not OS.get_cmdline_args().find("-p") == -1) else (OS.get_cmdline_args().find("--port") + 1)])
-	print(host_port)
 	if not is_dedicated_server:
 		main_menu.hide()
 		$Menu/DollyCamera.hide()
@@ -93,21 +91,21 @@ func _on_host_button_pressed(is_dedicated_server: bool = false) -> void:
 		multiplayer.multiplayer_peer = enet_peer
 		multiplayer.peer_connected.connect(add_player)
 		multiplayer.peer_disconnected.connect(remove_player)
-		print("Started ENet server")
+		print("Started ENet server on port " + str(host_port))
 		
 	elif (network_backend_host_option_button.selected == WebSocket and not is_dedicated_server) or ((not OS.get_cmdline_args().find("--websocket") == -1) and is_dedicated_server):
 		websocket_peer.create_server(host_port)
 		multiplayer.multiplayer_peer = websocket_peer
 		multiplayer.peer_connected.connect(add_player)
 		multiplayer.peer_disconnected.connect(remove_player)
-		print("Started WebSocket server")
+		print("Started WebSocket server on port " + str(host_port))
 		
 	#elif (network_backend_host_option_button.selected == WebRTC and not is_dedicated_server) or (not OS.get_cmdline_args().find("--webrtc") == -1 and is_dedicated_server): TODO
 	#	webrtc_peer.create_server(host_port)
 	#	multiplayer.multiplayer_peer = webrtc_peer
 	#	multiplayer.peer_connected.connect(add_player)
 	#	multiplayer.peer_disconnected.connect(remove_player)
-	#	print("Started WebRTC server")
+	#	print("Started WebRTC server on port " + str(host_port))
 	
 	if (upnp_option_button.selected == UPnP and not is_dedicated_server) or (not OS.get_cmdline_args().find("upnp") == -1 and is_dedicated_server): upnp_setup_threaded(int(host_port_box.value))
 
