@@ -185,6 +185,10 @@ size_flags_vertical = 8
 button_pressed = true
 text = "Music"
 
+[node name="DisableCameraToggle" type="CheckButton" parent="Menu/Options/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Disable Camera"
+
 [node name="SensitivityLabel" type="Label" parent="Menu/Options/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Sensitivity"
@@ -332,11 +336,14 @@ layout_mode = 2
 tooltip_text = "Networking Backend
 Must be the same as server"
 selected = 0
-item_count = 2
+item_count = 3
 popup/item_0/text = "ENet"
 popup/item_0/id = 1
 popup/item_1/text = "WebSocket"
 popup/item_1/id = 0
+popup/item_2/text = "WebRTC"
+popup/item_2/id = 2
+popup/item_2/disabled = true
 
 [node name="HSeparator" type="HSeparator" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
 visible = false
@@ -384,11 +391,14 @@ tooltip_text = "Networking Backend
 ENet - Only works with desktop clients.
 WebSocket - Also works with web clients."
 selected = 0
-item_count = 2
+item_count = 3
 popup/item_0/text = "ENet"
 popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
 popup/item_1/id = 0
+popup/item_2/text = "WebRTC"
+popup/item_2/id = 2
+popup/item_2/disabled = true
 
 [node name="HSeparator2" type="HSeparator" parent="Menu/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -423,6 +433,7 @@ transform = Transform3D(-4.37114e-08, -0.5, 0.866025, 0, 0.866025, 0.5, -1, 2.18
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/FpsCounter" to="FpsCounter" method="_on_fps_counter_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/Ping" to="FpsCounter" method="_on_ping_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/MusicToggle" to="." method="_on_music_toggle_toggled"]
+[connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/DisableCameraToggle" to="." method="_on_disable_camera_toggle_toggled"]
 [connection signal="value_changed" from="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer/MouseSensitivity" to="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer/MouseSensitivity" method="_on_value_changed"]
 [connection signal="value_changed" from="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer2/ControllerSensitivity" to="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer2/ControllerSensitivity" method="_on_value_changed"]
 [connection signal="pressed" from="Menu/Options/MarginContainer/VBoxContainer/Back" to="." method="_on_back_pressed"]
