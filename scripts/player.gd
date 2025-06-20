@@ -1,4 +1,5 @@
 extends CharacterBody3D
+class_name Player
 
 @onready var camera: Camera3D = $Camera3D
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
@@ -43,7 +44,7 @@ func _process(_delta: float) -> void:
 
 	rotate_y(-axis_vector.x * controller_sensitivity)
 	camera.rotate_x(-axis_vector.y * controller_sensitivity)
-	camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-90.0), deg_to_rad(90.0))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return

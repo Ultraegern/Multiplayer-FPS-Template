@@ -18,9 +18,11 @@ signal upnp_completed(error: int)
 @onready var server_cam: Camera3D = $ServerCamPivot/ServerCam
 @onready var server_cam_pivot: Node3D = $ServerCamPivot
 
+@onready var player_username: LineEdit = $Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername
+
 enum {ENet, WebSocket, WebRTC}
 enum {NoUPnP, UPnP}
-const Player = preload("res://player.tscn")
+const PLAYER = preload("res://player.tscn")
 var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var websocket_peer: WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
 var webrtc_peer: WebRTCMultiplayerPeer = WebRTCMultiplayerPeer.new()
@@ -29,12 +31,12 @@ var options: bool = false
 var controller: bool = false
 var upnp_thread: Thread = null
 var is_server: bool = false
+var player_info: Dictionary[int, Dictionary] = {} #Dictionary[int, Dictionary[String, String]]
 
 func _ready() -> void:
 	if OS.has_feature("dedicated_server"):
 		print("Starting dedicated server...")
 		_on_host_button_pressed(true)
-		
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("pause") and not main_menu.visible and not options_menu.visible:
@@ -78,7 +80,7 @@ func _on_back_pressed() -> void:
 
 func _on_host_button_pressed(is_dedicated_server: bool = false) -> void:
 	is_server = true
-	var host_port: int = int(host_port_box.value) if (not is_dedicated_server and (not OS.get_cmdline_args().find("-p") == -1 or not OS.get_cmdline_args().find("--port") == -1)) else int(OS.get_cmdline_args()[(OS.get_cmdline_args().find("-p") + 1) if (not OS.get_cmdline_args().find("-p") == -1) else (OS.get_cmdline_args().find("--port") + 1)])
+	var host_port: int = int(host_port_box.value) if (not is_dedicated_server or (OS.get_cmdline_args().find("-p") == -1 and OS.get_cmdline_args().find("--port") == -1)) else int(OS.get_cmdline_args()[(OS.get_cmdline_args().find("-p") + 1) if (not OS.get_cmdline_args().find("-p") == -1) else (OS.get_cmdline_args().find("--port") + 1)])
 	if not is_dedicated_server:
 		main_menu.hide()
 		$Menu/DollyCamera.hide()
@@ -107,6 +109,8 @@ func _on_host_button_pressed(is_dedicated_server: bool = false) -> void:
 	#	multiplayer.peer_disconnected.connect(remove_player)
 	#	print("Started WebRTC server on port " + str(host_port))
 	
+	player_info[1] = {"username":"Server"}
+	
 	if (upnp_option_button.selected == UPnP and not is_dedicated_server) or (not OS.get_cmdline_args().find("upnp") == -1 and is_dedicated_server): upnp_setup_threaded(int(host_port_box.value))
 
 func _on_join_button_pressed() -> void:
@@ -117,13 +121,17 @@ func _on_join_button_pressed() -> void:
 	var address: String = address_entry.text if address_entry.text else "127.0.0.1"
 	
 	if network_backend_join_option_button.selected == ENet:
-		enet_peer.create_client(address, int(join_port_box.value))
+		var error: Error = enet_peer.create_client(address, int(join_port_box.value))
+		if not error == OK:
+			push_error(error)
 		if options_menu.visible:
 			options_menu.hide()
 		multiplayer.multiplayer_peer = enet_peer
 		
 	elif network_backend_join_option_button.selected == WebSocket:
-		websocket_peer.create_client("ws://" + address + ":" + str(int(join_port_box.value)))
+		var error: Error = websocket_peer.create_client("ws://" + address + ":" + str(int(join_port_box.value)))
+		if not error == OK:
+			push_error(error)
 		if options_menu.visible:
 			options_menu.hide()
 		multiplayer.multiplayer_peer = websocket_peer
@@ -144,10 +152,21 @@ func _on_music_toggle_toggled(toggled_on: bool) -> void:
 	menu_music.stream_paused = not toggled_on
 
 func add_player(peer_id: int) -> void:
-	var player: Node = Player.instantiate()
+	var player: Player = PLAYER.instantiate()
 	player.name = str(peer_id)
 	add_child(player)
 	print("Player " + str(peer_id) + " joined")
+	
+	var username: String = player_username.text if player_username.text else str(peer_id)
+	print(username)
+	_register_player({"username":username}, peer_id)
+	
+	for child in get_children():
+		if child is Player:
+			var id: int = int(child.name)
+			var label: Label3D = child.find_child("Label3D")
+			if label: label.text = player_info[id]["username"]
+	print(player_info)
 
 func remove_player(peer_id: int) -> void:
 	var player: Node = get_node_or_null(str(peer_id))
@@ -191,6 +210,11 @@ func _exit_tree() -> void:
 	# Wait for thread finish here to handle game exit while the thread is running.
 	if upnp_thread: upnp_thread.wait_to_finish()
 
-func _on_disable_camera_toggle_toggled(toggled_on: bool) -> void:
+func _on_disable_camera_toggle_toggled(_toggled_on: bool) -> void:
 	# RenderingServer.viewport_set_disable_3d(, toggled_on) #TODO
 	pass
+
+@rpc("any_peer", "reliable")
+func _register_player(new_player_info: Dictionary[String, String], new_player_id: int) -> void:
+	#var new_player_id = multiplayer.get_remote_sender_id()
+	player_info[new_player_id] = new_player_info
