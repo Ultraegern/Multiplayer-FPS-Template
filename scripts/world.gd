@@ -1,4 +1,5 @@
 extends Node
+class_name GameMagager
 
 signal upnp_completed(error: int)
 
@@ -37,6 +38,8 @@ func _ready() -> void:
 	if OS.has_feature("dedicated_server"):
 		print("Starting dedicated server...")
 		_on_host_button_pressed(true)
+	elif not OS.get_cmdline_args().find("--host") == -1:
+		_on_host_button_pressed(false)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("pause") and not main_menu.visible and not options_menu.visible:
@@ -45,8 +48,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		controller = true
 	elif event is InputEventMouseMotion:
 		controller = false
+	#if event.is_action_pressed("ui_accept"): rpc("_print")
 
 func _process(delta: float) -> void:
+	$Menu/Label.text = str(player_info)
 	if is_server: server_cam_pivot.rotate_y(deg_to_rad(5.625) * delta)
 	if paused:
 		$Menu/Blur.show()
@@ -88,24 +93,40 @@ func _on_host_button_pressed(is_dedicated_server: bool = false) -> void:
 		menu_music.stop()
 		server_cam.current = true
 	
-	if (network_backend_host_option_button.selected == ENet and not is_dedicated_server) or (not((not OS.get_cmdline_args().find("--websocket") == -1) or (not OS.get_cmdline_args().find("--webrtc") == -1)) and is_dedicated_server):
+	if (network_backend_host_option_button.selected == ENet and not is_dedicated_server) \
+	 or (not((not OS.get_cmdline_args().find("--websocket") == -1) or (not OS.get_cmdline_args().find("--webrtc") == -1)) and is_dedicated_server):
 		enet_peer.create_server(host_port)
 		multiplayer.multiplayer_peer = enet_peer
-		multiplayer.peer_connected.connect(add_player)
+		multiplayer.peer_connected.connect(
+			func(new_peer_id: int) -> void:
+				add_player(new_peer_id)
+				rpc_id(new_peer_id, "register_previously_added_players", player_info)
+				)
 		multiplayer.peer_disconnected.connect(remove_player)
 		print("Started ENet server on port " + str(host_port))
 		
-	elif (network_backend_host_option_button.selected == WebSocket and not is_dedicated_server) or ((not OS.get_cmdline_args().find("--websocket") == -1) and is_dedicated_server):
+	elif (network_backend_host_option_button.selected == WebSocket and not is_dedicated_server) \
+	 or ((not OS.get_cmdline_args().find("--websocket") == -1) and is_dedicated_server):
 		websocket_peer.create_server(host_port)
 		multiplayer.multiplayer_peer = websocket_peer
 		multiplayer.peer_connected.connect(add_player)
+		multiplayer.peer_connected.connect(
+			func(new_peer_id: int) -> void:
+				add_player(new_peer_id)
+				rpc_id(new_peer_id, "register_previously_added_players", player_info)
+				)
 		multiplayer.peer_disconnected.connect(remove_player)
 		print("Started WebSocket server on port " + str(host_port))
 		
-	#elif (network_backend_host_option_button.selected == WebRTC and not is_dedicated_server) or (not OS.get_cmdline_args().find("--webrtc") == -1 and is_dedicated_server): TODO
+	#elif (network_backend_host_option_button.selected == WebRTC and not is_dedicated_server) \
+	# or (not OS.get_cmdline_args().find("--webrtc") == -1 and is_dedicated_server): TODO
 	#	webrtc_peer.create_server(host_port)
 	#	multiplayer.multiplayer_peer = webrtc_peer
-	#	multiplayer.peer_connected.connect(add_player)
+	#	multiplayer.peer_connected.connect(
+	#		func(new_peer_id: int) -> void:
+	#			add_player(new_peer_id)
+	#			rpc_id(new_peer_id, "register_previously_added_players", player_info)
+	#			)
 	#	multiplayer.peer_disconnected.connect(remove_player)
 	#	print("Started WebRTC server on port " + str(host_port))
 	
@@ -156,17 +177,6 @@ func add_player(peer_id: int) -> void:
 	player.name = str(peer_id)
 	add_child(player)
 	print("Player " + str(peer_id) + " joined")
-	
-	var username: String = player_username.text if player_username.text else str(peer_id)
-	print(username)
-	_register_player({"username":username}, peer_id)
-	
-	for child in get_children():
-		if child is Player:
-			var id: int = int(child.name)
-			var label: Label3D = child.find_child("Label3D")
-			if label: label.text = player_info[id]["username"]
-	print(player_info)
 
 func remove_player(peer_id: int) -> void:
 	var player: Node = get_node_or_null(str(peer_id))
@@ -214,7 +224,26 @@ func _on_disable_camera_toggle_toggled(_toggled_on: bool) -> void:
 	# RenderingServer.viewport_set_disable_3d(, toggled_on) #TODO
 	pass
 
-@rpc("any_peer", "reliable")
-func _register_player(new_player_info: Dictionary[String, String], new_player_id: int) -> void:
-	#var new_player_id = multiplayer.get_remote_sender_id()
+@rpc("authority", "call_remote", "reliable")
+func register_previously_added_players(previous_player_info: Dictionary[int, Dictionary]) -> void:
+	for key: int in previous_player_info.keys():
+		register_player(previous_player_info[key], key)
+
+func call_register_player(new_player_info: Dictionary, new_player_id: int) -> void:
+	rpc("register_newly_added_player", new_player_info, new_player_id)
+	register_player(new_player_info, new_player_id)
+
+@rpc("any_peer", "call_remote", "reliable")
+func register_newly_added_player(new_player_info: Dictionary, new_player_id: int) -> void:
+	register_player(new_player_info, new_player_id)
+
+func register_player(new_player_info: Dictionary, new_player_id: int) -> void: #Dictionary[int, Dictionary[String, String]]
 	player_info[new_player_id] = new_player_info
+	update_nametags()
+
+func update_nametags() -> void:
+	for child in get_children():
+		if child is Player:
+			var id: int = int(child.name)
+			var label: Label3D = child.find_child("Label3D")
+			if label and player_info.has(id): label.text = player_info[id]["username"]
