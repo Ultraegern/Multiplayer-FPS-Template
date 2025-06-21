@@ -1,15 +1,18 @@
-[gd_scene load_steps=20 format=3 uid="uid://b2qhxdrnviyqf"]
+[gd_scene load_steps=21 format=3 uid="uid://b2qhxdrnviyqf"]
 
 [ext_resource type="Script" uid="uid://chau3g47tjw26" path="res://scripts/player.gd" id="1_8tdgl"]
-[ext_resource type="PackedScene" uid="uid://cutckskghm3gy" path="res://imports/pistol.glb" id="2_0s6en"]
+[ext_resource type="PackedScene" uid="uid://cutckskghm3gy" path="res://assets/3d/pistol.glb" id="2_0s6en"]
 [ext_resource type="Texture2D" uid="uid://ctosmto80mu2s" path="res://textures/kenney_particle_pack/star_05.png" id="3_ep0ec"]
 [ext_resource type="AudioStream" uid="uid://bevvvtb8n4qfc" path="res://audio/645317__darkshroom__m9_noisegate-1780.ogg" id="3_pilvn"]
 [ext_resource type="Texture2D" uid="uid://duu4nryr7idps" path="res://textures/kenney_particle_pack/circle_05.png" id="4_ssmal"]
 [ext_resource type="Script" uid="uid://dv6odfeehyf3i" path="res://scripts/ui/crosshair.gd" id="5_fnci2"]
+[ext_resource type="PackedScene" uid="uid://fja63eg814fj" path="res://m4_carbine.tscn" id="7_1jxqw"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_7800j"]
+radius = 0.4
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kk8xf"]
+radius = 0.4
 
 [sub_resource type="Gradient" id="Gradient_054tn"]
 offsets = PackedFloat32Array(0, 0.15942, 1)
@@ -159,6 +162,7 @@ properties/2/spawn = true
 properties/2/replication_mode = 1
 
 [node name="player" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 0.999391, -0.0348995, 0, 0.0348995, 0.999391, 0, 0, 0)
 collision_layer = 2
 script = ExtResource("1_8tdgl")
 
@@ -172,9 +176,19 @@ shape = SubResource("CapsuleShape3D_kk8xf")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+fov = 85.0
+
+[node name="Node3D" type="Node3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.451, -0.228, -0.704)
+
+[node name="M4Carbine" parent="Camera3D/Node3D" instance=ExtResource("7_1jxqw")]
+
+[node name="aftrækker" parent="Camera3D/Node3D/M4Carbine" index="0"]
+transform = Transform3D(0.022235, -0.000154215, -0.000110735, 0.000127582, 0.027198, 0.000463549, 8.83529e-05, -0.000464173, 0.0271982, -0.000664823, -0.00714682, 0.717681)
 
 [node name="pistol" parent="Camera3D" instance=ExtResource("2_0s6en")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.25, -0.5)
+visible = false
 
 [node name="GunshotSound" type="AudioStreamPlayer3D" parent="Camera3D/pistol"]
 unique_name_in_owner = true
@@ -227,3 +241,5 @@ outline_size = 120
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="child_order_changed" from="MeshInstance3D" to="." method="_on_mesh_instance_3d_child_order_changed"]
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
+
+[editable path="Camera3D/Node3D/M4Carbine"]

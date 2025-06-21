@@ -24,7 +24,7 @@ enum {NoUPnP, UPnP}
 const PLAYER = preload("res://player.tscn")
 var enet_peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 var websocket_peer: WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
-var webrtc_peer: WebRTCMultiplayerPeer = WebRTCMultiplayerPeer.new()
+#var webrtc_peer: WebRTCMultiplayerPeer = WebRTCMultiplayerPeer.new()
 var paused: bool = false
 var options: bool = false
 var controller: bool = false

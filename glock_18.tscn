@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://c73hbgutolqw5"]
+
+[ext_resource type="PackedScene" uid="uid://6nct21tas7bc" path="res://assets/3d/glock18reload.blend" id="1_lssfp"]
+
+[node name="glock18" instance=ExtResource("1_lssfp")]

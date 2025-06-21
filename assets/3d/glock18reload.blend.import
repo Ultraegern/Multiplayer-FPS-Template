@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bic80ruu2xevd"
-path="res://.godot/imported/pistol.blend-281c137f87eaa6326c9199211bc0970a.scn"
+uid="uid://6nct21tas7bc"
+path="res://.godot/imported/glock18reload.blend-81c2a477225f9d910056cd84caad0ed9.scn"
 
 [deps]
 
-source_file="res://imports/source/pistol.blend"
-dest_files=["res://.godot/imported/pistol.blend-281c137f87eaa6326c9199211bc0970a.scn"]
+source_file="res://assets/3d/glock18reload.blend"
+dest_files=["res://.godot/imported/glock18reload.blend-81c2a477225f9d910056cd84caad0ed9.scn"]
 
 [params]
 

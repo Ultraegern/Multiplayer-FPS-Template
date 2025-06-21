@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://imjnu0xbvgvv"
-path="res://.godot/imported/map.blend-f130d836b9f3e358657ef0019674849d.scn"
+uid="uid://b3ax0453dosnt"
+path="res://.godot/imported/Flamethrower.blend-17e359f7a8dbf4b774f4a5962e52a71c.scn"
 
 [deps]
 
-source_file="res://imports/source/map.blend"
-dest_files=["res://.godot/imported/map.blend-f130d836b9f3e358657ef0019674849d.scn"]
+source_file="res://assets/3d/Flamethrower.blend"
+dest_files=["res://.godot/imported/Flamethrower.blend-17e359f7a8dbf4b774f4a5962e52a71c.scn"]
 
 [params]
 

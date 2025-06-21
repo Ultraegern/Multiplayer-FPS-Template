@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://n2bo0odtkdeh"]
+
+[ext_resource type="PackedScene" uid="uid://b3ax0453dosnt" path="res://assets/3d/Flamethrower.blend" id="1_1yrg3"]
+
+[node name="Flamethrower" instance=ExtResource("1_1yrg3")]
