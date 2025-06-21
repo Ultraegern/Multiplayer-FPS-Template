@@ -436,11 +436,6 @@ size_flags_horizontal = 4
 size_flags_vertical = 8
 text = "Show Advanced Networking"
 
-[node name="Label" type="Label" parent="Menu"]
-offset_right = 40.0
-offset_bottom = 23.0
-text = "dwdaoiwjdaowid"
-
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://b2qhxdrnviyqf")
 spawn_path = NodePath("..")

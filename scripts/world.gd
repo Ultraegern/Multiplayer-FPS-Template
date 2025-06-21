@@ -19,8 +19,6 @@ signal upnp_completed(error: int)
 @onready var server_cam: Camera3D = $ServerCamPivot/ServerCam
 @onready var server_cam_pivot: Node3D = $ServerCamPivot
 
-@onready var player_username: LineEdit = $Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername
-
 enum {ENet, WebSocket, WebRTC}
 enum {NoUPnP, UPnP}
 const PLAYER = preload("res://player.tscn")
@@ -51,7 +49,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	#if event.is_action_pressed("ui_accept"): rpc("_print")
 
 func _process(delta: float) -> void:
-	$Menu/Label.text = str(player_info)
 	if is_server: server_cam_pivot.rotate_y(deg_to_rad(5.625) * delta)
 	if paused:
 		$Menu/Blur.show()
