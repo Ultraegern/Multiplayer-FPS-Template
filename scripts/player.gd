@@ -1,13 +1,17 @@
 extends CharacterBody3D
 class_name Player
 
+const GUN_SHOT: AudioStream = preload("res://audio/645317__darkshroom__m9_noisegate-1780.ogg")
+const GUN_HIT: AudioStream = preload("res://assets/audio/hitmarker_2.mp3")
+
 @onready var camera: Camera3D = $Camera3D
 @onready var anim_player: AnimationPlayer = $Camera3D/Node3D/M4Carbine/AnimationPlayer2
 @onready var muzzle_flash: GPUParticles3D = $Camera3D/pistol/GPUParticles3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
-@onready var gunshot_sound: AudioStreamPlayer3D = %GunshotSound
+@onready var gun_audio_player: AudioStreamPlayer3D = %GunshotSound
 @onready var world: GameMagager = $".."
 @onready var player_username: LineEdit = $"../Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername"
+@onready var gun_animation_tree: AnimationTree = $Camera3D/GunAnimationTree
 
 const MAX_HEALTH: int = 100
 var health: int = MAX_HEALTH
@@ -62,27 +66,30 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotate_x(-event.relative.y * sensitivity)
 	camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
 	
-	if Input.is_action_just_pressed("shoot") \
-		 and not anim_player.current_animation == "shoot":
-		shoot()
+	if Input.is_action_pressed("shoot"):
+		gun_animation_tree.parameters.conditions.shoot = true
+	else:
+		gun_animation_tree.parameters.conditions.shoot = false
 	
 	if Input.is_action_just_pressed("respawn"):
 		recieve_damage(10000)
 	
-	if Input.is_action_just_pressed("capture"):
-		if mouse_captured:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-			mouse_captured = false
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			mouse_captured = true
+	if Input.is_action_just_pressed("ui_cancel"):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	
+	if event is InputEventMouseButton:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func shoot() -> void:
-	play_shoot_effects.rpc()
-	gunshot_sound.play()
+	rpc("play_shoot_effects")
 	if raycast.is_colliding() and str(raycast.get_collider()).contains("CharacterBody3D") :
 		var hit_player: Object = raycast.get_collider()
 		hit_player.recieve_damage.rpc_id(hit_player.get_multiplayer_authority())
+		gun_audio_player.stream = GUN_HIT
+		gun_audio_player.play()
+	else:
+		gun_audio_player.stream = GUN_SHOT
+		gun_audio_player.play()
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.multiplayer_peer != null:
