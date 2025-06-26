@@ -67,18 +67,16 @@ advance_mode = 2
 advance_condition = &"shoot"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_urp6f"]
-switch_mode = 2
 advance_mode = 2
-advance_condition = &"!move"
+advance_condition = &"shoot_!move"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bwjto"]
 advance_mode = 2
 advance_condition = &"shoot"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_606se"]
-switch_mode = 2
 advance_mode = 2
-advance_condition = &"move"
+advance_condition = &"shoot_move"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_u1c27"]
 states/Idle/node = SubResource("AnimationNodeAnimation_2hs0m")
@@ -264,6 +262,8 @@ anim_player = NodePath("../Node3D/M4Carbine/AnimationPlayer2")
 parameters/conditions/!move = false
 parameters/conditions/move = false
 parameters/conditions/shoot = false
+parameters/conditions/shoot_!move = false
+parameters/conditions/shoot_move = false
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -293,6 +293,25 @@ billboard = 1
 text = "Username Here"
 font_size = 320
 outline_size = 120
+
+[node name="HeathBar" type="ProgressBar" parent="."]
+visible = false
+custom_minimum_size = Vector2(200, 0)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -35.0
+offset_right = 100.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_vertical = 8
+step = 1.0
+value = 69.0
+rounded = true
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="child_order_changed" from="MeshInstance3D" to="." method="_on_mesh_instance_3d_child_order_changed"]

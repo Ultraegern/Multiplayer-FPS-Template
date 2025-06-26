@@ -12,6 +12,7 @@ const GUN_HIT: AudioStream = preload("res://assets/audio/hitmarker_2.mp3")
 @onready var world: GameMagager = $".."
 @onready var player_username: LineEdit = $"../Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername"
 @onready var gun_animation_tree: AnimationTree = $Camera3D/GunAnimationTree
+@onready var heath_bar: ProgressBar = $HeathBar
 
 const MAX_HEALTH: int = 100
 var health: int = MAX_HEALTH
@@ -47,14 +48,29 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	camera.current = true
 	position = spawns[randi() % spawns.size()]
+	heath_bar.value = health
+	heath_bar.show()
 
 func _process(_delta: float) -> void:
+	if Input.is_action_pressed("shoot") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		shoot()
 	sensitivity = Global.sensitivity
 	controller_sensitivity = Global.controller_sensitivity
 	
 	rotate_y(-axis_vector.x * controller_sensitivity)
 	camera.rotate_x(-axis_vector.y * controller_sensitivity)
 	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-90.0), deg_to_rad(90.0))
+	if not Input.get_vector("left", "right", "up", "down").is_zero_approx() and is_on_floor():
+		gun_animation_tree.set("parameters/conditions/!move", false)
+		gun_animation_tree.set("parameters/conditions/move", true)
+		gun_animation_tree.set("parameters/conditions/shoot_!move", false)
+		gun_animation_tree.set("parameters/conditions/shoot_move", not gun_animation_tree.get("parameters/conditions/shoot"))
+	else:
+		gun_animation_tree.set("parameters/conditions/!move", true)
+		gun_animation_tree.set("parameters/conditions/move", false)
+		gun_animation_tree.set("parameters/conditions/shoot_!move", not gun_animation_tree.get("parameters/conditions/shoot"))
+		gun_animation_tree.set("parameters/conditions/shoot_move", false)
+	#print(gun_animation_tree.get("parameters/conditions/!move"), gun_animation_tree.get("parameters/conditions/move"), gun_animation_tree.get("parameters/conditions/shoot"))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return
@@ -64,12 +80,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		rotate_y(-event.relative.x * sensitivity)
 		camera.rotate_x(-event.relative.y * sensitivity)
-	camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-90.0), deg_to_rad(90.0))
 	
 	if Input.is_action_pressed("shoot"):
-		gun_animation_tree.parameters.conditions.shoot = true
+		gun_animation_tree.set("parameters/conditions/shoot", true)
 	else:
-		gun_animation_tree.parameters.conditions.shoot = false
+		gun_animation_tree.set("parameters/conditions/shoot", false)
 	
 	if Input.is_action_just_pressed("respawn"):
 		recieve_damage(10000)
@@ -81,7 +97,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func shoot() -> void:
-	rpc("play_shoot_effects")
+	print("shoot")
+	#rpc("play_shoot_effects")
+	play_shoot_effects()
 	if raycast.is_colliding() and str(raycast.get_collider()).contains("CharacterBody3D") :
 		var hit_player: Object = raycast.get_collider()
 		hit_player.recieve_damage.rpc_id(hit_player.get_multiplayer_authority())
@@ -132,11 +150,13 @@ func play_shoot_effects() -> void:
 	#muzzle_flash.emitting = true
 
 @rpc("any_peer", "call_remote", "unreliable")
-func recieve_damage(damage: int = 1) -> void:
+func recieve_damage(damage: int = 5) -> void:
 	health -= damage
 	if health <= 0:
 		health = MAX_HEALTH
 		position = spawns[randi() % spawns.size()]
+	heath_bar.value = health
+	print(health)
 
 func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 	if anim_name == "Shoot Hip" and not Input.is_action_pressed("shoot"):

@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://fja63eg814fj"]
+[gd_scene load_steps=10 format=3 uid="uid://fja63eg814fj"]
 
 [ext_resource type="PackedScene" uid="uid://d0gr0l7hilpv2" path="res://assets/3d/Lowpoly_M4_carbine.blend" id="1_lp7k4"]
+[ext_resource type="Script" uid="uid://qtcdiy3u1p1l" path="res://m_4_carbine.gd" id="2_p43jk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lp7k4"]
 albedo_color = Color(1, 0, 0, 1)
@@ -84,6 +85,18 @@ tracks/5/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [Vector3(0, 0, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("OmniLight3D:visible")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
 }
 
 [sub_resource type="Animation" id="Animation_lp7k4"]
@@ -186,6 +199,18 @@ tracks/7/keys = {
 "update": 0,
 "values": [Vector3(0, 0, 0)]
 }
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("OmniLight3D:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
 
 [sub_resource type="Animation" id="Animation_oy4a0"]
 length = 0.001
@@ -284,6 +309,18 @@ tracks/7/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [Vector3(0, 0, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("OmniLight3D:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
 }
 
 [sub_resource type="Animation" id="Animation_p43jk"]
@@ -386,6 +423,32 @@ tracks/7/keys = {
 "update": 0,
 "values": [Vector3(0, 0, 0)]
 }
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("OmniLight3D:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.05),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/9/type = "method"
+tracks/9/imported = false
+tracks/9/enabled = false
+tracks/9/path = NodePath(".")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"shoot"
+}]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7x1mc"]
 _data = {
@@ -395,8 +458,11 @@ _data = {
 &"Shoot Hip": SubResource("Animation_p43jk")
 }
 
+[sub_resource type="SphereMesh" id="SphereMesh_lp7k4"]
+
 [node name="M4Carbine" instance=ExtResource("1_lp7k4")]
 transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
+script = ExtResource("2_p43jk")
 
 [node name="aftrækker" parent="." index="0"]
 transform = Transform3D(0.022235, -0.000154215, -0.000110735, 0.000127583, 0.027198, 0.00046355, 8.8353e-05, -0.000464174, 0.0271982, -0.000664823, -0.00714682, 0.717681)
@@ -430,3 +496,15 @@ libraries = {
 &"": SubResource("AnimationLibrary_7x1mc")
 }
 autoplay = "Idle"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="15"]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -1.77313, 0.257072, -2.55889)
+visible = false
+mesh = SubResource("SphereMesh_lp7k4")
+skeleton = NodePath("../OmniLight3D")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." index="16"]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0.257072, -2.91305)
+visible = false
+light_color = Color(1, 1, 0.298039, 1)
+light_energy = 2.577
