@@ -1,5 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://c73hbgutolqw5"]
+[gd_scene load_steps=3 format=3 uid="uid://c73hbgutolqw5"]
 
 [ext_resource type="PackedScene" uid="uid://6nct21tas7bc" path="res://assets/3d/glock18reload.blend" id="1_lssfp"]
+[ext_resource type="Material" uid="uid://dx5gcsrxi2kxr" path="res://assets/materials/red_dot.tres" id="3_qmb0s"]
 
 [node name="glock18" instance=ExtResource("1_lssfp")]
+
+[node name="Løb" parent="." index="3"]
+transform = Transform3D(-6.52656e-08, -0.118163, 0, 0.118163, -6.52656e-08, 0, 0, 0, -0.118163, 0.000382755, 1.16939, 0.00119406)
+
+[node name="RedDot" parent="." index="4"]
+surface_material_override/1 = ExtResource("3_qmb0s")
