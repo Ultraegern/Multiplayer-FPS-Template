@@ -81,6 +81,9 @@ shader_parameter/color_over = Color(0, 0, 0, 1)
 
 [node name="World" type="Node"]
 script = ExtResource("1_ho7yh")
+help_str = "-p <port>, --port <port>		Set the server port (Deafalut: 9999, Min: 1024, Max: 65535)
+--websocket		Use WebSocket networking instead of ENet
+--upnp					Use UPnP automatic port forwarding"
 
 [node name="LightmapGI" type="LightmapGI" parent="."]
 visible = false

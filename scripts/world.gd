@@ -19,6 +19,8 @@ signal upnp_completed(error: int)
 @onready var server_cam: Camera3D = $ServerCamPivot/ServerCam
 @onready var server_cam_pivot: Node3D = $ServerCamPivot
 
+@export_multiline var help_str: String
+
 enum {ENet, WebSocket, WebRTC}
 enum {NoUPnP, UPnP}
 const PLAYER = preload("res://player.tscn")
@@ -34,6 +36,8 @@ var player_info: Dictionary[int, Dictionary] = {} #Dictionary[int, Dictionary[St
 
 func _ready() -> void:
 	if OS.has_feature("dedicated_server"):
+		print(help_str)
+		print()
 		print("Starting dedicated server...")
 		_on_host_button_pressed(true)
 	elif not OS.get_cmdline_args().find("--host") == -1:
