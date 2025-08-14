@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://fja63eg814fj"]
+[gd_scene load_steps=11 format=3 uid="uid://fja63eg814fj"]
 
 [ext_resource type="PackedScene" uid="uid://d0gr0l7hilpv2" path="res://assets/3d/Lowpoly_M4_carbine.blend" id="1_lp7k4"]
-[ext_resource type="Script" uid="uid://qtcdiy3u1p1l" path="res://m_4_carbine.gd" id="2_p43jk"]
+[ext_resource type="Script" uid="uid://qtcdiy3u1p1l" path="res://scripts/m_4_carbine.gd" id="2_p43jk"]
+[ext_resource type="Material" uid="uid://dx5gcsrxi2kxr" path="res://assets/materials/red_dot.tres" id="3_oy4a0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lp7k4"]
 albedo_color = Color(1, 0, 0, 1)
@@ -477,13 +478,21 @@ transform = Transform3D(0.0779901, 0, 0, 0, 0.164903, 0, 0, 0, 0.164903, 0, -0.1
 visible = false
 
 [node name="Red Dot" parent="." index="5"]
+visible = false
 surface_material_override/0 = SubResource("StandardMaterial3D_lp7k4")
+
+[node name="sigte_001" parent="." index="6"]
+visible = false
 
 [node name="Muzle Flach 1" parent="." index="7"]
 visible = false
 
 [node name="Muzle Flach 2" parent="." index="8"]
 visible = false
+
+[node name="sigte_002" parent="." index="9"]
+transform = Transform3D(0.0270708, 0, 0, 0, 0.0270708, 0, 0, 0, 0.0270708, 0, 0.432142, -0.0447928)
+surface_material_override/0 = ExtResource("3_oy4a0")
 
 [node name="Light" parent="." index="10"]
 visible = false
