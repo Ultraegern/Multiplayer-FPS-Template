@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="FPS Multiplayer Template"
-run/main_scene="res://nodes/world.tscn"
+run/main_scene="res://world.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -34,11 +34,7 @@ window/vsync/vsync_mode=0
 folder_colors={
 "res://assets/": "teal",
 "res://assets/3d/": "red",
-"res://assets/audio/": "gray",
-"res://audio/": "orange",
-"res://nodes/": "blue",
-"res://scripts/": "green",
-"res://textures/": "red"
+"res://assets/audio/": "gray"
 }
 
 [input]
