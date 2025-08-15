@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bjlro2bgr7xwo"]
+
+[ext_resource type="Script" uid="uid://11lnsy5subyk" path="res://scripts/audio_once_player_3d.gd" id="1_rbr3a"]
+
+[node name="AudioOncePlayer3D" type="AudioStreamPlayer3D"]
+autoplay = true
+script = ExtResource("1_rbr3a")
+
+[connection signal="finished" from="." to="." method="_on_finished"]

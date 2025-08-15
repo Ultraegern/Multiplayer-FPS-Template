@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgi6vinbtksu3"]
+
+[ext_resource type="Script" uid="uid://5ac088v3ui60" path="res://scripts/audio_once_player_3d_spawner.gd" id="1_sj2oy"]
+
+[node name="AudioOncePlayer3DSpawner" type="Node3D"]
+script = ExtResource("1_sj2oy")
