@@ -268,3 +268,32 @@ func _on_fullscreen_item_selected(index: int) -> void:
 		exclusiveFullscreen:
 			DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 			#DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+
+enum {off, fxaa, taa, msaa_x2, msaa_x4, msaa_x8}
+func _on_aa_item_selected(index: int) -> void:
+	var rid: RID = get_tree().get_root().get_viewport_rid()
+	match index:
+		off:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_DISABLED)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED)
+			RenderingServer.viewport_set_use_taa(rid, false)
+		fxaa:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_DISABLED)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_FXAA)
+			RenderingServer.viewport_set_use_taa(rid, false)
+		taa:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_DISABLED)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED)
+			RenderingServer.viewport_set_use_taa(rid, true)
+		msaa_x2:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_2X)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED)
+			RenderingServer.viewport_set_use_taa(rid, false)
+		msaa_x4:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_4X)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED)
+			RenderingServer.viewport_set_use_taa(rid, false)
+		msaa_x8:
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_8X)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED)
+			RenderingServer.viewport_set_use_taa(rid, false)

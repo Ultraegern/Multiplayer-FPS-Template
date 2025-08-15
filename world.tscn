@@ -1,7 +1,8 @@
-[gd_scene load_steps=23 format=3 uid="uid://b57uspbprxc8"]
+[gd_scene load_steps=24 format=3 uid="uid://b57uspbprxc8"]
 
 [ext_resource type="Script" uid="uid://dl71w3286o4vu" path="res://scripts/world.gd" id="1_ho7yh"]
 [ext_resource type="LightmapGIData" uid="uid://m80p8mvaiylg" path="res://world.lmbake" id="2_70uel"]
+[ext_resource type="ArrayOccluder3D" uid="uid://b4xkjrauepbwa" path="res://world.occ" id="3_70uel"]
 [ext_resource type="PackedScene" uid="uid://bd3ai1v40ssao" path="res://map.tscn" id="3_fd0sg"]
 [ext_resource type="Script" uid="uid://cbg6vc7ae5bfx" path="res://scripts/ui/fps_counter.gd" id="4_2328u"]
 [ext_resource type="Script" uid="uid://ciupioa0w3fwx" path="res://scripts/ui/menu/host_button.gd" id="4_nuahp"]
@@ -92,6 +93,9 @@ bounces = 4
 bounce_indirect_energy = 1.3
 generate_probes_subdiv = 4
 light_data = ExtResource("2_70uel")
+
+[node name="OccluderInstance3D" type="OccluderInstance3D" parent="."]
+occluder = ExtResource("3_70uel")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_v7lsv")
@@ -193,6 +197,33 @@ popup/item_0/text = "Windowed"
 popup/item_0/id = 0
 popup/item_1/text = "Exclusive Fullscreen"
 popup/item_1/id = 3
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="Menu/Options/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Anti-Aliasing"
+
+[node name="AA" type="OptionButton" parent="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+selected = 3
+fit_to_longest_item = false
+allow_reselect = true
+item_count = 6
+popup/item_0/text = "Off (Fastest)"
+popup/item_0/id = 0
+popup/item_1/text = "FXAA (Fast)"
+popup/item_1/id = 1
+popup/item_2/text = "TAA (Average)"
+popup/item_2/id = 2
+popup/item_3/text = "MSAA x2 (Average)"
+popup/item_3/id = 3
+popup/item_4/text = "MSAA x4 (Slow)"
+popup/item_4/id = 4
+popup/item_5/text = "MSAA x8 (Very Slow)"
+popup/item_5/id = 5
 
 [node name="FpsCounter" type="CheckButton" parent="Menu/Options/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -461,6 +492,7 @@ spawn_path = NodePath("..")
 transform = Transform3D(-4.37114e-08, -0.5, 0.866025, 0, 0.866025, 0.5, -1, 2.18557e-08, -3.78552e-08, 18, 5, 0)
 
 [connection signal="item_selected" from="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer3/Fullscreen" to="." method="_on_fullscreen_item_selected"]
+[connection signal="item_selected" from="Menu/Options/MarginContainer/VBoxContainer/HBoxContainer4/AA" to="." method="_on_aa_item_selected"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/FpsCounter" to="FpsCounter" method="_on_fps_counter_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/Ping" to="FpsCounter" method="_on_ping_toggled"]
 [connection signal="toggled" from="Menu/Options/MarginContainer/VBoxContainer/MusicToggle" to="." method="_on_music_toggle_toggled"]
