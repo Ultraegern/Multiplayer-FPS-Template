@@ -1,18 +1,19 @@
 extends CharacterBody3D
 class_name Player
 
-const GUN_SHOT: AudioStream = preload("res://audio/645317__darkshroom__m9_noisegate-1780.ogg")
-const GUN_HIT: AudioStream = preload("res://assets/audio/hitmarker_2.mp3")
+#const GUN_SHOT: AudioStream = preload("res://audio/645317__darkshroom__m9_noisegate-1780.ogg")
+#const GUN_HIT: AudioStream = preload("res://assets/audio/hitmarker_2.mp3")
 
 @onready var camera: Camera3D = $Camera3D
 @onready var anim_player: AnimationPlayer = $Camera3D/Node3D/M4Carbine/AnimationPlayer2
 @onready var muzzle_flash: GPUParticles3D = $Camera3D/pistol/GPUParticles3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
-@onready var gun_audio_player: AudioStreamPlayer3D = %GunshotSound
+@onready var gun_audio_player: AudioOncePlayer3DSpawner = $Camera3D/Node3D/AudioOncePlayer3DSpawner
 @onready var world: GameMagager = $".."
 @onready var player_username: LineEdit = $"../Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername"
 @onready var gun_animation_tree: AnimationTree = $Camera3D/GunAnimationTree
 @onready var heath_bar: ProgressBar = $HeathBar
+@onready var gun_timer: Timer = $GunTimer
 
 const MAX_HEALTH: int = 100
 var health: int = MAX_HEALTH
@@ -97,17 +98,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func shoot() -> void:
+	if not gun_timer.is_stopped(): return
 	print("shoot")
 	#rpc("play_shoot_effects")
 	play_shoot_effects()
-	if raycast.is_colliding() and str(raycast.get_collider()).contains("CharacterBody3D") :
+	if raycast.is_colliding() and str(raycast.get_collider()).contains("CharacterBody3D"):
 		var hit_player: Object = raycast.get_collider()
 		hit_player.recieve_damage.rpc_id(hit_player.get_multiplayer_authority())
-		gun_audio_player.stream = GUN_HIT
+		#gun_audio_player.stream = GUN_HIT
 		gun_audio_player.play()
 	else:
-		gun_audio_player.stream = GUN_SHOT
+		#gun_audio_player.stream = GUN_SHOT
 		gun_audio_player.play()
+	gun_timer.start(0.8)
+	print(gun_timer.time_left)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.multiplayer_peer != null:
@@ -131,11 +135,11 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 	
-	if anim_player.current_animation == "Shoot":
-		pass
-	elif Input.is_action_pressed("shoot") and not anim_player.current_animation == "shoot":
-		pass
-	elif not input_dir == Vector2.ZERO and is_on_floor() :
+	#if anim_player.current_animation == "Shoot":
+	#	pass
+	#elif Input.is_action_pressed("shoot") and not anim_player.current_animation == "shoot":
+	#	pass
+	if not input_dir == Vector2.ZERO and is_on_floor() :
 		anim_player.play("Move")
 	else:
 		anim_player.play("Idle")
@@ -159,7 +163,7 @@ func recieve_damage(damage: int = 5) -> void:
 	print(health)
 
 func _on_animation_player_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "Shoot Hip" and not Input.is_action_pressed("shoot"):
+	if anim_name == "Shoot Hip":# and not Input.is_action_pressed("shoot"):
 		anim_player.play("Idle")
-	elif anim_name == "Shoot Hip" and Input.is_action_pressed("shoot"):
-		shoot()
+	#elif anim_name == "Shoot Hip" and Input.is_action_pressed("shoot"):
+	#	shoot()

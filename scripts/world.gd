@@ -34,6 +34,9 @@ var upnp_thread: Thread = null
 var is_server: bool = false
 var player_info: Dictionary[int, Dictionary] = {} #Dictionary[int, Dictionary[String, String]]
 
+func _enter_tree() -> void:
+	ProjectSettings.set_setting("display/window/stretch/scale", float(DisplayServer.window_get_size().y))
+
 func _ready() -> void:
 	if OS.has_feature("dedicated_server"):
 		print(help_str)
@@ -42,6 +45,7 @@ func _ready() -> void:
 		_on_host_button_pressed(true)
 	elif not OS.get_cmdline_args().find("--host") == -1:
 		_on_host_button_pressed(false)
+		AudioServer.set_bus_mute(0, true)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_pressed("pause") and not main_menu.visible and not options_menu.visible:
@@ -72,7 +76,6 @@ func _on_options_pressed() -> void:
 	_on_resume_pressed()
 	$Menu/Options.show()
 	$Menu/Blur.show()
-	%Fullscreen.grab_focus()
 	if not controller:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	options = true
@@ -248,3 +251,20 @@ func update_nametags() -> void:
 			var id: int = int(child.name)
 			var label: Label3D = child.find_child("Label3D")
 			if label and player_info.has(id): label.text = player_info[id]["username"]
+
+enum {windowed, windowedFullscreen, fullscreen, exclusiveFullscreen}
+func _on_fullscreen_item_selected(index: int) -> void:
+	match index:
+		windowed:
+			DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_WINDOWED)
+			#DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+		#windowedFullscreen:
+			#DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_WINDOWED)
+			#DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
+			#DisplayServer.window_set_size()
+		#fullscreen:
+			#DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_FULLSCREEN)
+			#DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+		exclusiveFullscreen:
+			DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+			#DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)

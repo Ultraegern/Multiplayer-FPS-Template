@@ -1,8 +1,10 @@
-[gd_scene load_steps=31 format=3 uid="uid://b2qhxdrnviyqf"]
+[gd_scene load_steps=33 format=3 uid="uid://b2qhxdrnviyqf"]
 
 [ext_resource type="Script" uid="uid://chau3g47tjw26" path="res://scripts/player.gd" id="1_8tdgl"]
 [ext_resource type="PackedScene" uid="uid://cutckskghm3gy" path="res://assets/3d/pistol.glb" id="2_0s6en"]
+[ext_resource type="Script" uid="uid://5ac088v3ui60" path="res://scripts/audio_once_player_3d_spawner.gd" id="3_dw050"]
 [ext_resource type="Texture2D" uid="uid://ctosmto80mu2s" path="res://textures/kenney_particle_pack/star_05.png" id="3_ep0ec"]
+[ext_resource type="AudioStream" uid="uid://bhqt7jw16447m" path="res://assets/audio/hitmarker_2.mp3" id="4_b26j0"]
 [ext_resource type="Texture2D" uid="uid://duu4nryr7idps" path="res://textures/kenney_particle_pack/circle_05.png" id="4_ssmal"]
 [ext_resource type="Script" uid="uid://dv6odfeehyf3i" path="res://scripts/ui/crosshair.gd" id="5_fnci2"]
 [ext_resource type="PackedScene" uid="uid://fja63eg814fj" path="res://m4_carbine.tscn" id="7_1jxqw"]
@@ -232,6 +234,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.451, -0.228, -0.704)
 [node name="aftrækker" parent="Camera3D/Node3D/M4Carbine" index="0"]
 transform = Transform3D(0.022235, -0.000154215, -0.000110735, 0.000127583, 0.027198, 0.00046355, 8.8353e-05, -0.000464174, 0.0271982, -0.000664823, -0.00714682, 0.717681)
 
+[node name="AudioOncePlayer3DSpawner" type="Node3D" parent="Camera3D/Node3D"]
+script = ExtResource("3_dw050")
+audio_stream = ExtResource("4_b26j0")
+metadata/_custom_type_script = "uid://5ac088v3ui60"
+
 [node name="pistol" parent="Camera3D" instance=ExtResource("2_0s6en")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.25, -0.5)
 visible = false
@@ -249,11 +256,6 @@ draw_pass_1 = SubResource("PlaneMesh_fbvoh")
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
 target_position = Vector3(0, 0, -50)
 collision_mask = 3
-
-[node name="GunshotSound" type="AudioStreamPlayer3D" parent="Camera3D"]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.25, -0.5)
-bus = &"SFX"
 
 [node name="GunAnimationTree" type="AnimationTree" parent="Camera3D"]
 root_node = NodePath("../Node3D/M4Carbine")
@@ -312,6 +314,9 @@ size_flags_vertical = 8
 step = 1.0
 value = 69.0
 rounded = true
+
+[node name="GunTimer" type="Timer" parent="."]
+one_shot = true
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="child_order_changed" from="MeshInstance3D" to="." method="_on_mesh_instance_3d_child_order_changed"]

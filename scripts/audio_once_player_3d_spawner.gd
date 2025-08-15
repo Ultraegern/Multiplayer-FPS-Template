@@ -5,7 +5,7 @@ class_name AudioOncePlayer3DSpawner
 
 @onready var audio_once_player_3d: PackedScene = preload("res://nodes/audio_once_player_3d.tscn")
 
-func play():
+func play() -> void:
 	var node: AudioOncePlayer3D = audio_once_player_3d.instantiate()
 	node.stream = audio_stream
 	add_child(node)
