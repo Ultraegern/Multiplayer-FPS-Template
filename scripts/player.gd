@@ -1,17 +1,13 @@
 extends CharacterBody3D
 class_name Player
 
-#const GUN_SHOT: AudioStream = preload("res://audio/645317__darkshroom__m9_noisegate-1780.ogg")
-#const GUN_HIT: AudioStream = preload("res://assets/audio/hitmarker_2.mp3")
-
 @onready var camera: Camera3D = $Camera3D
-@onready var anim_player: AnimationPlayer = $Camera3D/Node3D/M4Carbine/AnimationPlayer2
+@onready var anim_player: AnimationPlayer = $"../AnimationPlayer"
 @onready var muzzle_flash: GPUParticles3D = $Camera3D/pistol/GPUParticles3D
 @onready var raycast: RayCast3D = $Camera3D/RayCast3D
 @onready var gun_audio_player: AudioOncePlayer3DSpawner = $Camera3D/Node3D/AudioOncePlayer3DSpawner
 @onready var world: GameMagager = $".."
 @onready var player_username: LineEdit = $"../Menu/MainMenu/MarginContainer/VBoxContainer/PlayerInfoHBoxContainer/PlayerUsername"
-@onready var gun_animation_tree: AnimationTree = $Camera3D/GunAnimationTree
 @onready var heath_bar: ProgressBar = $HeathBar
 @onready var gun_timer: Timer = $GunTimer
 
@@ -32,7 +28,7 @@ var sensitivity : float =  .005
 var controller_sensitivity : float =  .010
 
 var axis_vector : Vector2
-var	mouse_captured : bool = true
+var mouse_captured : bool = true
 
 const SPEED = 5.5
 const JUMP_VELOCITY = 5.5
@@ -61,17 +57,6 @@ func _process(_delta: float) -> void:
 	rotate_y(-axis_vector.x * controller_sensitivity)
 	camera.rotate_x(-axis_vector.y * controller_sensitivity)
 	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-90.0), deg_to_rad(90.0))
-	if not Input.get_vector("left", "right", "up", "down").is_zero_approx() and is_on_floor():
-		gun_animation_tree.set("parameters/conditions/!move", false)
-		gun_animation_tree.set("parameters/conditions/move", true)
-		gun_animation_tree.set("parameters/conditions/shoot_!move", false)
-		gun_animation_tree.set("parameters/conditions/shoot_move", not gun_animation_tree.get("parameters/conditions/shoot"))
-	else:
-		gun_animation_tree.set("parameters/conditions/!move", true)
-		gun_animation_tree.set("parameters/conditions/move", false)
-		gun_animation_tree.set("parameters/conditions/shoot_!move", not gun_animation_tree.get("parameters/conditions/shoot"))
-		gun_animation_tree.set("parameters/conditions/shoot_move", false)
-	#print(gun_animation_tree.get("parameters/conditions/!move"), gun_animation_tree.get("parameters/conditions/move"), gun_animation_tree.get("parameters/conditions/shoot"))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority(): return
@@ -82,11 +67,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotate_y(-event.relative.x * sensitivity)
 		camera.rotate_x(-event.relative.y * sensitivity)
 	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-90.0), deg_to_rad(90.0))
-	
-	if Input.is_action_pressed("shoot"):
-		gun_animation_tree.set("parameters/conditions/shoot", true)
-	else:
-		gun_animation_tree.set("parameters/conditions/shoot", false)
 	
 	if Input.is_action_just_pressed("respawn"):
 		recieve_damage(10000)
@@ -99,33 +79,27 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func shoot() -> void:
 	if not gun_timer.is_stopped(): return
-	print("shoot")
-	#rpc("play_shoot_effects")
+	
 	play_shoot_effects()
 	if raycast.is_colliding() and str(raycast.get_collider()).contains("CharacterBody3D"):
 		var hit_player: Object = raycast.get_collider()
 		hit_player.recieve_damage.rpc_id(hit_player.get_multiplayer_authority())
-		#gun_audio_player.stream = GUN_HIT
 		gun_audio_player.play()
 	else:
-		#gun_audio_player.stream = GUN_SHOT
 		gun_audio_player.play()
+	
 	gun_timer.start(0.8)
-	print(gun_timer.time_left)
 
 func _physics_process(delta: float) -> void:
 	if multiplayer.multiplayer_peer != null:
 		if not is_multiplayer_authority(): return
-	# Add the gravity.
+	
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	
-	# Handle jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 	
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
 	var input_dir := Input.get_vector("left", "right", "up", "down")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y))
 	if direction:
@@ -135,10 +109,6 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 	
-	#if anim_player.current_animation == "Shoot":
-	#	pass
-	#elif Input.is_action_pressed("shoot") and not anim_player.current_animation == "shoot":
-	#	pass
 	if not input_dir == Vector2.ZERO and is_on_floor() :
 		anim_player.play("Move")
 	else:
@@ -149,9 +119,7 @@ func _physics_process(delta: float) -> void:
 @rpc("authority", "call_local", "unreliable")
 func play_shoot_effects() -> void:
 	anim_player.stop()
-	anim_player.play("Shoot Hip")
-	#muzzle_flash.restart()
-	#muzzle_flash.emitting = true
+	anim_player.play("")
 
 @rpc("any_peer", "call_remote", "unreliable")
 func recieve_damage(damage: int = 5) -> void:
@@ -161,9 +129,3 @@ func recieve_damage(damage: int = 5) -> void:
 		position = spawns[randi() % spawns.size()]
 	heath_bar.value = health
 	print(health)
-
-func _on_animation_player_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "Shoot Hip":# and not Input.is_action_pressed("shoot"):
-		anim_player.play("Idle")
-	#elif anim_name == "Shoot Hip" and Input.is_action_pressed("shoot"):
-	#	shoot()
